@@ -1,32 +1,65 @@
-#pragma once
+#include "typewise-alert.h"
+#include <stdio.h>
 
-typedef enum {
-  PASSIVE_COOLING,
-  HI_ACTIVE_COOLING,
-  MED_ACTIVE_COOLING
-} CoolingType;
+// Constants for email notifications
+const char* EMAIL_RECIPIENT = "a.b@c.com";
 
-typedef enum {
-  NORMAL,
-  TOO_LOW,
-  TOO_HIGH
-} BreachType;
+// Function to get temperature limits based on cooling type
+TemperatureLimits getTemperatureLimits(CoolingType coolingType) {
+    TemperatureLimits limits[] = {
+        {0, 35},  // PASSIVE_COOLING
+        {0, 45},  // HI_ACTIVE_COOLING
+        {0, 40}   // MED_ACTIVE_COOLING
+    };
+    return limits[coolingType];
+}
 
-BreachType inferBreach(double value, double lowerLimit, double upperLimit);
-BreachType classifyTemperatureBreach(CoolingType coolingType, double temperatureInC);
+// Function to check if the value is too low or too high
+BreachType checkBreach(double value, int lowerLimit, int upperLimit) {
+    if (value < lowerLimit) {
+        return TOO_LOW;
+    }
+    if (value > upperLimit) {
+        return TOO_HIGH;
+    }
+    return NORMAL;
+}
 
-typedef enum {
-  TO_CONTROLLER,
-  TO_EMAIL
-} AlertTarget;
+// Function to classify temperature breach
+BreachType classifyTemperatureBreach(CoolingType coolingType, double temperatureInC) {
+    TemperatureLimits limits = getTemperatureLimits(coolingType);
+    return checkBreach(temperatureInC, limits.lowerLimit, limits.upperLimit);
+}
 
-typedef struct {
-  CoolingType coolingType;
-  char brand[48];
-} BatteryCharacter;
+// Helper function to send email notifications
+void notifyByEmail(const char* message) {
+    printf("To: %s\n", EMAIL_RECIPIENT);
+    printf("Hi, %s\n", message);
+}
 
-void checkAndAlert(
-  AlertTarget alertTarget, BatteryCharacter batteryChar, double temperatureInC);
+// Function to handle alerts
+void checkAndAlert(AlertTarget alertTarget, BatteryCharacter batteryChar, double temperatureInC) {
+    BreachType breachType = classifyTemperatureBreach(batteryChar.coolingType, temperatureInC);
 
-void sendToController(BreachType breachType);
-void sendToEmail(BreachType breachType);
+    if (alertTarget == TO_CONTROLLER) {
+        sendToController(breachType);
+    } else if (alertTarget == TO_EMAIL) {
+        sendToEmail(breachType);
+    }
+}
+
+// Function to send alerts to the controller
+void sendToController(BreachType breachType) {
+    const unsigned short header = 0xfeed;
+    printf("%x : %x\n", header, breachType);
+}
+
+// Function to send email alerts
+void sendToEmail(BreachType breachType) {
+    if (breachType == TOO_LOW) {
+        notifyByEmail("the temperature is too low");
+    } else if (breachType == TOO_HIGH) {
+        notifyByEmail("the temperature is too high");
+    }
+    // No action needed for NORMAL case
+}
