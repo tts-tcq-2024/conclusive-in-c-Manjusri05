@@ -20,11 +20,10 @@ add_executable(
   cleancode
   typewise-alert.cpp
   typewise-alert.tests.cpp
-  typewise-alert.h
 )
 target_link_libraries(
   cleancode
-  GTest::gmock_main
+  GTest::gtest_main
   gcov
 )
 
