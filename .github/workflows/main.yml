@@ -14,7 +14,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v2
 
        
     - name: Set up CMake
@@ -28,7 +28,7 @@ jobs:
         
         
     - name: Lizard Runner
-      uses: Uno-Takashi/Lizard-Runner@v3
+      uses: Uno-Takashi/Lizard-Runner@v2
       with:
           path: "./"
           CCN: "3"
