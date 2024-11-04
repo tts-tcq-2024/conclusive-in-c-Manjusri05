@@ -1,5 +1,6 @@
-include <stdio.h>
+#include <stdio.h>
 #include <assert.h>
+#include <string.h>
 #include "typewise-alert.h"
 
 // Test for getTemperatureLimits function
